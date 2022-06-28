@@ -12,7 +12,7 @@ class OwnedType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('user')
+            ->add('user') // ¿Eliminar porque va a venir automatico? ¿Vamos a usar este formulario en absoluto?
             ->add('game')
         ;
     }
