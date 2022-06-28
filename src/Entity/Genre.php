@@ -15,7 +15,7 @@ class Genre
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'string', length: 30)]
+    #[ORM\Column(type: 'string', length: 30, unique: true)]
     private $name;
 
     #[ORM\OneToMany(mappedBy: 'genre', targetEntity: Game::class)]
@@ -24,6 +24,11 @@ class Genre
     public function __construct()
     {
         $this->games = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->name;
     }
 
     public function getId(): ?int
