@@ -11,14 +11,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+
 #[Route('/admin/user')]
 class UserController extends AbstractController
 {
     #[Route('/', name: 'app_admin_user_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
+            $users = $userRepository->findAll();
+        } else {
+            $users = $userRepository->findBy(['email' => $this->getUser()->getUserIdentifier()]);
+        }
         return $this->render('admin/user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'users' => $users
         ]);
     }
 
@@ -59,17 +65,32 @@ class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'app_admin_user_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $form = $this->createForm(UserType::class, $user);
+        if (
+            !$this->isGranted('ROLE_SUPERADMIN')
+            && $user->getUserIdentifier() != $this->getUser()->getUserIdentifier()
+        ) {
+            throw $this->createAccessDeniedException('No puedes editar un usuario que no sea tuyo');
+        }
+        $oldPassword = $user->getPassword();
+        $oldRoles = $user->getRoles();
+        $form = $this->createForm(UserType::class, $user, [
+            'isSuperadmin' => $this->isGranted('ROLE_SUPERADMIN')
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $hashedPassword = $passwordHasher->hashPassword(
-                $user,
-                $user->getPassword()
-            );
-            $user->setPassword($hashedPassword);
-
+            if ($user->getPassword() == '') {
+                $user->setPassword($oldPassword);
+            } else {
+                $hashedPassword = $passwordHasher->hashPassword(
+                    $user,
+                    $user->getPassword()
+                );
+                $user->setPassword($hashedPassword);
+            }
+            if (!$this->isGranted('ROLE_SUPERADMIN')) {
+                $user->setRoles($oldRoles);
+            }
             $userRepository->add($user, true);
 
             return $this->redirectToRoute('app_admin_user_index', [], Response::HTTP_SEE_OTHER);
