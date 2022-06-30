@@ -14,6 +14,16 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserController extends AbstractController
 {
+
+    #[Route('/api/user/{user}/game/get', methods: 'GET')]
+    public function getGamesAction(User $user , UserRepository $userRepository): Response
+    {
+        return $this->json([
+            'result' => $userRepository->getUserGames($user)
+        ]);
+    }
+
+
     #[Route('/api/user', methods: 'GET')]
     public function index(Request $request, UserRepository $userRepository, PaginatorInterface $paginator): Response
     {
@@ -38,59 +48,21 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/api/user/', methods: 'POST')]
-    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    #[Route('/api/user/new', methods: 'POST')]
+    public function new(Request $request, UserRepository $userRepository): Response
     {
-        // add new user
+        $validator = ['email', 'password', 'roles', 'nickname', 'dateofbirth', 'avatar'];
         $data = $request->toArray();
-        if (isset($data['email'])) {
-            if (isset($data['password'])) {
-                if (isset($data['roles'])) {
-                    if (isset($data['nickname'])) {
-                        if (isset($data['dateofbirth'])) {
-                            if (isset($data['avatar'])) {
-                                $user = new User();
-                                $user->setEmail($data['email']);
 
-                                $hashedPassword = $passwordHasher->hashPassword(
-                                    $user,
-                                    $data['password']
-                                );
-                                $user->setPassword($hashedPassword);
-
-                                $user->setRoles($data['roles']);
-                                $user->setNickname($data['nickname']);
-                                $user->setDob(new \DateTime($data['dateofbirth']), 'Y/m/d');
-                                $user->setAvatar($data['avatar']);
-                                $em->persist($user);
-                                $em->flush();
-                                return $this->json([
-                                    'id' => $user->getId(),
-                                    'email' => $user->getEmail(),
-                                    'password' => $user->getPassword(),
-                                    'roles' => $user->getRoles(),
-                                    'nickname' => $user->getNickname(),
-                                    'dateofbirth' => $user->getDob(),
-                                    'avatar' => $user->getAvatar(),
-                                ]);
-                            } else {
-                                return new Response('Avatar field not found', 400);
-                            }
-                        } else {
-                            return new Response('Date of birth field not found', 400);
-                        }
-                    } else {
-                        return new Response('Nickname field not found', 400);
-                    }
-                } else {
-                    return new Response('Roles field not found', 400);
-                }
-            } else {
-                return new Response('Password field not found', 400);
+        foreach ($validator as $validation) {
+            if (!isset($data[$validation])) {
+                return new Response('key ' . $validation . ' not', 422); // 422: entity not processable
             }
-        } else {
-            return new Response('Email field not found', 400);
         }
+        
+        $user = $userRepository->createUser($data);
+
+        return $this->json($user->toArray());
     }
 
     #[Route('/api/user/{id}', methods: 'GET')]
@@ -101,34 +73,48 @@ class UserController extends AbstractController
         if ($user == null) {
             throw $this->createNotFoundException();
         }
-        return $this->json([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'password' => $user->getPassword(),
-            'roles' => $user->getRoles(),
-            'nickname' => $user->getNickname(),
-            'dateofbirth' => $user->getDob(),
-            'avatar' => $user->getAvatar(),
-        ]);
+        return $this->json($user->toArray());
     }
 
-    #[Route('/api/user/{id}', methods: 'PUT')]
-    public function edit(Request $request, UserRepository $userRepository, PaginatorInterface $paginator): Response
+    #[Route('/api/user/edit/{id}', methods: 'PUT')]
+    public function edit($id, UserRepository $userRepository, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
-        // edit user
-        $result = 'ok PUT';
-        return $this->json([
-            'users' => $result
-        ]);
+        // edit user // Pending: controlling access per role
+        $user = $userRepository->find($id);
+        if ($user == null) {
+            throw $this->createNotFoundException();
+        }
+        // Trying to control who can edit 
+        if (
+            !$this->isGranted('ROLE_SUPERADMIN')
+            && $user->getUserIdentifier() != $this->getUser()->getUserIdentifier()
+        ) {
+            throw $this->createAccessDeniedException('No puedes editar un usuario que no sea tuyo');
+        }
+        return new Response('Email field not found', 400);
     }
 
-    #[Route('/api/user/{id}', methods: 'DELETE')]
-    public function delete(Request $request, UserRepository $userRepository, PaginatorInterface $paginator): Response
+    #[Route('/api/user/delete/{id}', methods: 'DELETE')]
+    public function delete($id, UserRepository $userRepository): Response
     {
-        // delete user
-        $result = 'ok DELETE';
+        $user = $userRepository->find($id);
+        if ($user == null) {
+            throw $this->createNotFoundException('key' .$id. 'not found. There is no such user.');
+        }
+        if (!$this->isGranted('ROLE_SUPERADMIN')) {
+            throw $this->createAccessDeniedException('Only a superadmin can delete users.');
+        }
+        
+        try {
+            $userRepository->remove($user, true);
+        } catch (\Exception $exception) {
+            return $this->json([
+                'message' => $exception->getMessage()
+            ], 400);
+        }
+
         return $this->json([
-            'users' => $result
+            'result' => 'ok',
         ]);
     }
 }

@@ -12,20 +12,31 @@ security:
         # used to reload user from session & other features (e.g. switch_user)
         # used to reload user from session & other features (e.g. switch_user)
         # used to reload user from session & other features (e.g. switch_user)
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            jwt: ~
+        
         main:
             lazy: true
             provider: app_user_provider
 
-            form_login:
-                login_path: login
-                check_path: login
-
-            logout:
-                path: app_logout
+#            logout:
+#                path: app_logout
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -36,9 +47,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-         - { path: ^/admin/genre, roles: ROLE_SUPERADMIN }
-         - { path: ^/admin, roles: IS_AUTHENTICATED_FULLY }
+
+       #  - { path: ^/, roles: PUBLIC_ACCESS }
+         - { path: ^/api, roles: PUBLIC_ACCESS }
+        # - { path: ^/api, roles: ROLE_USER }
+         #- { path: ^/admin, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

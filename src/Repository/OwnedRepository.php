@@ -39,6 +39,12 @@ class OwnedRepository extends ServiceEntityRepository
         }
     }
 
+    public function getQueryAll()
+    {
+        $qb = $this->createQueryBuilder('ownedqb');
+        return $qb->getQuery();
+    }
+
 //    /**
 //     * @return Owned[] Returns an array of Owned objects
 //     */

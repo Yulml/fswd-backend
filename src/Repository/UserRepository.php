@@ -4,7 +4,9 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -19,7 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $passwordHasher)
     {
         parent::__construct($registry, User::class);
     }
@@ -62,6 +64,52 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $qb->getQuery();
     }
 
+    public function createUser(array $data): User {
+        // add new user 
+        //we control the avatar because we should always have default_avatar.jpg as a fallback
+        $user = new User();
+        $user->setEmail($data['email']);
+        $hashedPassword = $this->passwordHasher->hashPassword(
+            $user,
+            $data['password']
+        );
+
+        $user->setPassword($hashedPassword);
+        $user->setRoles($data['roles']);
+        $user->setNickname($data['nickname']);
+        $user->setDob(new \DateTime($data['dateofbirth']), 'Y/m/d');
+        $user->setAvatar($data['avatar']);
+
+        $this->_em->persist($user);
+        $this->_em->flush();
+        return $user;
+ }   
+
+ public function editUser(User $user) {
+    $qb = $this->createQueryBuilder('u');
+    return $this->createQueryBuilder('u')
+    ->select('u, o, g')
+    ->leftJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
+    ->leftJoin('o.game', 'g')
+    ->getQuery()
+    ->getArrayResult();
+
+}
+
+
+
+
+
+    public function getUserGames(User $user) {
+        $qb = $this->createQueryBuilder('u');
+        return $this->createQueryBuilder('u')
+        ->select('u, o, g')
+        ->leftJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
+        ->leftJoin('o.game', 'g')
+        ->getQuery()
+        ->getArrayResult();
+
+    }
 
 //    /**
 //     * @return User[] Returns an array of User objects
