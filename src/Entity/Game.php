@@ -123,5 +123,15 @@ class Game
         }
 
         return $this;
+    }    
+
+    public function toArray(): array {
+        return [
+                'id' => $this->getId(),
+                'cover' => $this->getCover(), 
+                'name' => $this->getName(),
+                'genre' => $this->getGenre(),// References table Genre, I get circular reference error
+                'platform' => $this->getPlatform(),// References table Platform, I get circular reference error
+        ];
     }
 }

@@ -39,6 +39,12 @@ class GameRepository extends ServiceEntityRepository
         }
     }
 
+    public function getQueryAll()
+    {
+        $qb = $this->createQueryBuilder('userqb');
+        return $qb->getQuery();
+    }
+
 //    /**
 //     * @return Game[] Returns an array of Game objects
 //     */
