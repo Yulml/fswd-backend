@@ -127,11 +127,10 @@ class Game
 
     public function toArray(): array {
         return [
-                'id' => $this->getId(),
                 'cover' => $this->getCover(), 
                 'name' => $this->getName(),
-                'genre' => $this->getGenre(),// References table Genre, I get circular reference error
-                'platform' => $this->getPlatform(),// References table Platform, I get circular reference error
+                'genre' => $this->getGenre()->toArray,
+                'platform' => $this->getPlatform(),
         ];
     }
 }

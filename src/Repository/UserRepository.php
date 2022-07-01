@@ -6,6 +6,7 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -21,7 +22,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $passwordHasher)
+    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $passwordHasher, private PaginatorInterface $paginator)
     {
         parent::__construct($registry, User::class);
     }
@@ -60,7 +61,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function getQueryAll()
     {
-        $qb = $this->createQueryBuilder('userqb');
+        $qb = $this->createQueryBuilder('u');
         return $qb->getQuery();
     }
 
@@ -96,22 +97,63 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     //SQL para obtener los juegos por plataforma
     //SELECT game.name, game.cover, genre.name genre FROM game INNER JOIN genre ON game.genre_id = genre.id WHERE platform_id LIKE 3; 
 
-    // SQL para obtener los juegos por usuario
-    // SELECT game.name, game.cover, genre.name genre, platform.name platform FROM GAME 
-    // INNER JOIN genre ON game.genre_id = genre.id 
-    // INNER JOIN platform ON game.platform_id = platform.id
-    // WHERE game.id IN (SELECT game_id FROM owned WHERE user_id LIKE 1)  <--- $user->getId()
-
     public function getUserGames(User $user)
     {
         $qb = $this->createQueryBuilder('u');
+
         return $this->createQueryBuilder('u')
-            ->select('u, o, g')
-            ->leftJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
-            ->leftJoin('o.game', 'g')
+            ->select('u, o, g , gn, pl')
+            ->innerJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
+            ->innerJoin('o.game', 'g')
+            ->innerJoin('g.genre', 'gn')
+            ->innerJoin('g.platform', 'pl')
             ->getQuery()
             ->getArrayResult();
     }
+
+    public function update(User $user, array $data): ?User
+    {
+        if ($data['email'] !== '') {
+            $user->setEmail($data['email']);
+        }
+        if ($data['roles'] !== '' || $data['roles'] !== 'ROLE_USER') {
+            $user->setRoles($data['roles']);
+        }
+        if ($data['password'] !== '') {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $user,
+                $user->getPassword()
+            );
+            $user->setPassword($hashedPassword);
+        }
+        if ($data['nickname'] !== '') {
+            $user->setNickname($data['nickname']);
+        }
+        if ($data['dateofbirth'] !== '') {
+            $user->setDob(new \DateTime($data['dateofbirth']), 'Y/m/d');
+        }
+        if ($data['avatar'] !== '') {
+            $user->setAvatar($data['avatar']);
+        }
+
+        $this->_em->flush();
+
+        return $user;
+    }
+
+    public function getAllUsersPaginated(int $currentPage, int $registerPerPage): array
+    {
+        $query = $this->getQueryAll();
+        $users = $this->paginator->paginate($query, $currentPage, $registerPerPage);
+        $result = [];
+
+        foreach ($users as $user) {
+            $result[] = $user->toArray();
+        }
+
+        return $result;
+    }
+
 
     //    /**
     //     * @return User[] Returns an array of User objects

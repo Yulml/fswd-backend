@@ -186,7 +186,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     
     public function toArray(): array {
         return [
-            'id' => $this->getId(),
             'email' => $this->getEmail(),
             'password' => $this->getPassword(),
             'roles' => $this->getRoles(),

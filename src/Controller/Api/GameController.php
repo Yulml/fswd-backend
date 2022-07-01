@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class GameController extends AbstractController
 {
+    
     #[Route('/api/game', methods: 'GET')]
     public function index(Request $request, GameRepository $gameRepository, PaginatorInterface $paginator): Response
     {
@@ -20,12 +21,16 @@ class GameController extends AbstractController
         $games = $paginator->paginate($query, $currentPage, 10);
         $result = [];
         foreach ($games as $game) {
+            $platform = $game->getPlatform();
             $result[] = [
                 'id' => $game->getId(),
                 'name' => $game->getName(),
-                'platform' => $game->getPlatform(),
-                'cover' => $game->getCover(),
-                'genre' => $game->getGenre(),
+                'platform' => [
+                    'id' => $platform->getId(),
+                    'name' => $platform->getName(),
+                  //  'cover' => $platform->getCover(),
+                ] ,
+              //  'genre' => $game->getGenre(),
             ];
         }
         return $this->json([
