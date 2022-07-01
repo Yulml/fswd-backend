@@ -39,6 +39,12 @@ class GenreRepository extends ServiceEntityRepository
         }
     }
 
+    public function getQueryAll()
+    {
+        $qb = $this->createQueryBuilder('g');
+        return $qb->getQuery();
+    }
+
 //    /**
 //     * @return Genre[] Returns an array of Genre objects
 //     */

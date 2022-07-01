@@ -49,4 +49,11 @@ class Owned
 
         return $this;
     }
+    
+    public function toArray(): array {
+        return [
+            'user_id' => $this->getUser(),
+            'game_id' => $this->getGame(),
+        ];
+    }
 }

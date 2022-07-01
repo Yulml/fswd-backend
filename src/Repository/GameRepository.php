@@ -41,7 +41,7 @@ class GameRepository extends ServiceEntityRepository
 
     public function getQueryAll()
     {
-        $qb = $this->createQueryBuilder('userqb');
+        $qb = $this->createQueryBuilder('g');
         return $qb->getQuery();
     }
 

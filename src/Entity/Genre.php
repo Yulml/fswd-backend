@@ -77,4 +77,10 @@ class Genre
 
         return $this;
     }
+    
+    public function toArray(): array {
+        return [
+            'name' => $this->getName(),
+        ];
+    }
 }

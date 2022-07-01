@@ -66,7 +66,7 @@ class UserController extends AbstractController
     #[Route('/api/user/edit/{user}', methods: 'PUT')]
     public function edit(Request $request, User $user): Response
     {
-        return $this->json($this->userRepository->update($user, $request->toArray())->toArray());
+        return $this->json($this->userRepository->updateUser($user, $request->toArray())->toArray());
     }
 
     #[Route('/api/user/delete/{id}', methods: 'DELETE')]

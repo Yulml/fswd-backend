@@ -87,12 +87,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $user;
     }
 
-    public function editUser(User $user)
-    {
-
-        return $user;
-    }
-
 
     //SQL para obtener los juegos por plataforma
     //SELECT game.name, game.cover, genre.name genre FROM game INNER JOIN genre ON game.genre_id = genre.id WHERE platform_id LIKE 3; 
@@ -111,7 +105,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getArrayResult();
     }
 
-    public function update(User $user, array $data): ?User
+    public function updateUser(User $user, array $data): ?User
     {
         if ($data['email'] !== '') {
             $user->setEmail($data['email']);

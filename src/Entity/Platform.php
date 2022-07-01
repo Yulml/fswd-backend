@@ -92,4 +92,11 @@ class Platform
 
         return $this;
     }
+    
+    public function toArray(): array {
+        return [
+            'name' => $this->getName(),
+            'picture' => $this->getPicture(),
+        ];
+    }
 }

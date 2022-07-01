@@ -39,6 +39,12 @@ class PlatformRepository extends ServiceEntityRepository
         }
     }
 
+    public function getQueryAll()
+    {
+        $qb = $this->createQueryBuilder('p');
+        return $qb->getQuery();
+    }
+
 //    /**
 //     * @return Platform[] Returns an array of Platform objects
 //     */
