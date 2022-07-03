@@ -4,15 +4,10 @@ namespace App\Controller\Api;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Services\Utils;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Knp\Component\Pager\PaginatorInterface;
-use Monolog\Handler\Curl\Util;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserController extends AbstractController
 {
@@ -32,12 +27,14 @@ class UserController extends AbstractController
     #[Route('/api/user', methods: 'GET')]
     public function index(Request $request): Response
     {
+        // get all users, 10 per page
         return $this->json($this->userRepository->getAllUsersPaginated($request->query->get('page', 1), 10));
     }
 
     #[Route('/api/user/new', methods: 'POST')]
     public function new(Request $request, UserRepository $userRepository): Response
     {
+        // create new user
         $validator = ['email', 'password', 'roles', 'nickname', 'dateofbirth', 'avatar'];
         $data = $request->toArray();
 
@@ -46,9 +43,7 @@ class UserController extends AbstractController
                 return new Response('key ' . $validation . ' not', 422); // 422: entity not processable
             }
         }
-
         $user = $userRepository->createUser($data);
-
         return $this->json($user->toArray());
     }
 
@@ -61,6 +56,15 @@ class UserController extends AbstractController
             throw $this->createNotFoundException();
         }
         return $this->json($user->toArray());
+    }
+    
+    #[Route('/api/user/{id}/collector', methods: 'GET')]
+    public function getCollectorAction(User $user): Response
+    {
+        //show only nick and avatar specific user
+        return $this->json([
+            'result' => $this->userRepository->getCollector($user)
+        ]);
     }
 
     #[Route('/api/user/edit/{user}', methods: 'PUT')]

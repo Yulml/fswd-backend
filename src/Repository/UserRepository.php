@@ -88,19 +88,30 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
-    //SQL para obtener los juegos por plataforma
-    //SELECT game.name, game.cover, genre.name genre FROM game INNER JOIN genre ON game.genre_id = genre.id WHERE platform_id LIKE 3; 
-
     public function getUserGames(User $user)
     {
-        $qb = $this->createQueryBuilder('u');
 
+        // I want to show only the game name, game cover, genre name and platform name.
+
+        $qb = $this->createQueryBuilder('u');
+        
         return $this->createQueryBuilder('u')
-            ->select('u, o, g , gn, pl')
-            ->innerJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
-            ->innerJoin('o.game', 'g')
-            ->innerJoin('g.genre', 'gn')
-            ->innerJoin('g.platform', 'pl')
+        ->select('u, o, g, gn, pl')
+        ->innerJoin('u.owneds', 'o', Join::WITH, $qb->expr()->eq('u.id', $user->getId())) //afinar query
+        ->innerJoin('o.game', 'g')
+        ->innerJoin('g.genre', 'gn')
+        ->innerJoin('g.platform', 'pl')
+        ->getQuery()
+        ->getArrayResult();
+    }
+
+    public function getCollector(User $user)
+    {
+        $qb = $this->createQueryBuilder('u');
+        
+        return $this->createQueryBuilder('u')
+            ->select('u.nickname, u.avatar')
+            ->where($qb->expr()->eq('u.id', $user->getId()))
             ->getQuery()
             ->getArrayResult();
     }

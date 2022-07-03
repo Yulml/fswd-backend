@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Owned;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @extends ServiceEntityRepository<Owned>
@@ -16,7 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OwnedRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private PaginatorInterface $paginator)
     {
         parent::__construct($registry, Owned::class);
     }
@@ -43,6 +44,19 @@ class OwnedRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('o');
         return $qb->getQuery();
+    }
+
+    public function getAllOwnedPaginated(int $currentPage, int $registerPerPage): array
+    {
+        $query = $this->getQueryAll();
+        $owneds = $this->paginator->paginate($query, $currentPage, $registerPerPage);
+        $result = [];
+
+        foreach ($owneds as $owned) {
+            $result[] = $owned->toArray();
+        }
+
+        return $result;
     }
 
 //    /**

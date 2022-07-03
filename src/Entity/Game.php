@@ -129,7 +129,7 @@ class Game
         return [
                 'cover' => $this->getCover(), 
                 'name' => $this->getName(),
-                'genre' => $this->getGenre()->toArray,
+                'genre' => $this->getGenre(),
                 'platform' => $this->getPlatform(),
         ];
     }

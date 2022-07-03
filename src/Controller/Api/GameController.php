@@ -6,36 +6,20 @@ use App\Repository\GameRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class GameController extends AbstractController
 {
-    
+    public function __construct(
+        private GameRepository $gameRepository
+    ) {
+    }
+
     #[Route('/api/game', methods: 'GET')]
-    public function index(Request $request, GameRepository $gameRepository, PaginatorInterface $paginator): Response
+    public function index(Request $request): Response
     {
-        // show full list of games
-        $currentPage = $request->query->get('page', 1);
-        $query = $gameRepository->getQueryAll();
-        $games = $paginator->paginate($query, $currentPage, 10);
-        $result = [];
-        foreach ($games as $game) {
-            $platform = $game->getPlatform();
-            $result[] = [
-                'id' => $game->getId(),
-                'name' => $game->getName(),
-                'platform' => [
-                    'id' => $platform->getId(),
-                    'name' => $platform->getName(),
-                  //  'cover' => $platform->getCover(),
-                ] ,
-              //  'genre' => $game->getGenre(),
-            ];
-        }
-        return $this->json([
-            'result' => $result
-        ]);
+        // get all games, 10 per page
+        return $this->json($this->gameRepository->getAllGamesPaginated($request->query->get('page', 1), 10));
     }
 
     #[Route('/api/game/{id}', methods: 'GET')]
@@ -48,9 +32,4 @@ class GameController extends AbstractController
         }
         return $this->json($game->toArray());
     }
-
-
-
-
-    
 }

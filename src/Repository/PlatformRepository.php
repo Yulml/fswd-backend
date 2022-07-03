@@ -4,7 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Platform;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @extends ServiceEntityRepository<Platform>
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PlatformRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private PaginatorInterface $paginator)
     {
         parent::__construct($registry, Platform::class);
     }
@@ -43,6 +45,36 @@ class PlatformRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('p');
         return $qb->getQuery();
+    }
+
+    public function getAllPlatformsPaginated(int $currentPage, int $registerPerPage): array
+    {
+        $query = $this->getQueryAll();
+        $platforms = $this->paginator->paginate($query, $currentPage, $registerPerPage);
+        $result = [];
+
+        foreach ($platforms as $platform) {
+            $result[] = [
+                'name' => $platform->getName(),
+                'picture' => $platform->getpicture(),
+            ];
+        }
+        return $result;
+    }
+    
+    public function getPlatformGames(Platform $platform)
+    {
+        $result = []; 
+        $qb = $this->createQueryBuilder('p'); 
+        return $result[] = [
+            'name' => $platform->getName(),
+            'picture' => $platform->getpicture(),
+            'games' => $this->createQueryBuilder('p')
+            ->select('p.name, g.name, g.cover')
+            ->innerJoin('p.games', 'g', Join::WITH, $qb->expr()->eq('p.id', $platform->getId())) //afinar query)
+            ->getQuery()
+            ->getArrayResult()
+        ];
     }
 
 //    /**

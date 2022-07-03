@@ -4,7 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\AST\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @extends ServiceEntityRepository<Game>
@@ -16,7 +18,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class GameRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private PaginatorInterface $paginator)
     {
         parent::__construct($registry, Game::class);
     }
@@ -43,6 +45,37 @@ class GameRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('g');
         return $qb->getQuery();
+    }
+
+    public function getAllGamesPaginated(int $currentPage, int $registerPerPage): array
+    {
+        $query = $this->getQueryAll();
+        $games = $this->paginator->paginate($query, $currentPage, $registerPerPage);
+        $result = [];
+
+        foreach ($games as $game) {
+            $result[] = [
+                'name' => $game->getName(),
+                'platform' => $game->getPlatform()->getName(),
+                'genre' => $game->getGenre()->getName(),
+                'cover' => $game->getCover(),
+            ];
+        }
+        return $result;
+    }
+
+    //SQL para obtener los juegos por plataforma
+    //SELECT game.name, game.cover, genre.name genre FROM game INNER JOIN genre ON game.genre_id = genre.id WHERE platform_id LIKE 3; 
+
+    public function GetAllPerPlatform()
+    {
+        $qb = $this->createQueryBuilder('g');
+        return $this->createQueryBuilder('g')
+            ->select('g, gn, pl')
+            ->innerJoin('g.genre', 'gn')
+            ->innerJoin('g.platform', 'pl')
+            ->getQuery()
+            ->getArrayResult();
     }
 
 //    /**
