@@ -55,6 +55,7 @@ class PlatformRepository extends ServiceEntityRepository
 
         foreach ($platforms as $platform) {
             $result[] = [
+                'id' => $platform->getId(),
                 'name' => $platform->getName(),
                 'picture' => $platform->getpicture(),
             ];
@@ -66,7 +67,7 @@ class PlatformRepository extends ServiceEntityRepository
     {
         $result = []; 
         $qb = $this->createQueryBuilder('p'); 
-        return $result[] = [
+        return [
             'name' => $platform->getName(),
             'picture' => $platform->getpicture(),
             'games' => $this->createQueryBuilder('p')

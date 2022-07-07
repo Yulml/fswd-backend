@@ -44,7 +44,8 @@ class UserController extends AbstractController
             }
         }
         $user = $userRepository->createUser($data);
-        return $this->json($user->toArray());
+        $info = ["status"=> "succeeded", "data"=> $user->toArray(),"error"=>null];
+        return $this->json($info);
     }
 
     #[Route('/api/user/{id}', methods: 'GET')]
@@ -62,9 +63,7 @@ class UserController extends AbstractController
     public function getCollectorAction(User $user): Response
     {
         //show only nick and avatar specific user
-        return $this->json([
-            'result' => $this->userRepository->getCollector($user)
-        ]);
+        return $this->json($this->userRepository->getCollector($user));
     }
 
     #[Route('/api/user/edit/{user}', methods: 'PUT')]

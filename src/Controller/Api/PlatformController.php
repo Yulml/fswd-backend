@@ -27,9 +27,7 @@ class PlatformController extends AbstractController
     #[Route('/api/platform/{platform}/game', methods: 'GET')]
     public function getGamesAction(Platform $platform): Response
     {
-        return $this->json([
-            'result' => $this->platformRepository->getPlatformGames($platform)
-        ]);
+        return $this->json( $this->platformRepository->getPlatformGames($platform));
     }
 
     
