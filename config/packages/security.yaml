@@ -19,10 +19,10 @@ security:
             security: false
         
         login:
-            pattern: ^/api/login
+            pattern: ^/api/user/login
             stateless: true
             json_login:
-                check_path: /api/login_check
+                check_path: /api/user/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
@@ -49,8 +49,9 @@ security:
     access_control:
 
        #  - { path: ^/, roles: PUBLIC_ACCESS }
+         - { path: ^/api/user/*, roles: IS_AUTHENTICATED_FULLY }
          - { path: ^/api, roles: PUBLIC_ACCESS }
-        # - { path: ^/api, roles: ROLE_USER }
+
          #- { path: ^/admin, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

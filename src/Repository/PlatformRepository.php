@@ -65,13 +65,13 @@ class PlatformRepository extends ServiceEntityRepository
     
     public function getPlatformGames(Platform $platform)
     {
-        $result = []; 
         $qb = $this->createQueryBuilder('p'); 
         return [
+            'id' => $platform->getId(),
             'name' => $platform->getName(),
             'picture' => $platform->getpicture(),
             'games' => $this->createQueryBuilder('p')
-            ->select('p.name, g.name, g.cover')
+            ->select('g.id, g.name, g.cover')
             ->innerJoin('p.games', 'g', Join::WITH, $qb->expr()->eq('p.id', $platform->getId())) //afinar query)
             ->getQuery()
             ->getArrayResult()

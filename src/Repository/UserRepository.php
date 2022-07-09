@@ -88,6 +88,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
+
     public function getUserGames(User $user)
     {
 

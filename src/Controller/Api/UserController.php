@@ -19,9 +19,9 @@ class UserController extends AbstractController
     #[Route('/api/user/{user}/game/get', methods: 'GET')]
     public function getGamesAction(User $user): Response
     {
-        return $this->json([
-            'result' => $this->userRepository->getUserGames($user)
-        ]);
+        return $this->json(
+            $this->userRepository->getUserGames($user)
+        );
     }
 
     #[Route('/api/user', methods: 'GET')]
@@ -44,7 +44,7 @@ class UserController extends AbstractController
             }
         }
         $user = $userRepository->createUser($data);
-        $info = ["status"=> "succeeded", "data"=> $user->toArray(),"error"=>null];
+        $info = ["status" => "succeeded", "data" => $user->toArray(), "error" => null];
         return $this->json($info);
     }
 
@@ -58,7 +58,7 @@ class UserController extends AbstractController
         }
         return $this->json($user->toArray());
     }
-    
+
     #[Route('/api/user/{id}/collector', methods: 'GET')]
     public function getCollectorAction(User $user): Response
     {

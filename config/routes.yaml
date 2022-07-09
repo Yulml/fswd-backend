@@ -7,4 +7,4 @@ app_logout:
     methods: GET
 
 api_login_check:
-    path: /api/login_check
+    path: /api/user/login_check

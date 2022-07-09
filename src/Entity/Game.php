@@ -123,14 +123,16 @@ class Game
         }
 
         return $this;
-    }    
+    }
 
-    public function toArray(): array {
+    public function toArray(): array
+    {
         return [
-                'cover' => $this->getCover(), 
-                'name' => $this->getName(),
-                'genre' => $this->getGenre(),
-                'platform' => $this->getPlatform(),
+            'id' => $this->getId(),
+            'cover' => $this->getCover(),
+            'name' => $this->getName(),
+            'genre' => $this->getGenre(),
+            'platform' => $this->getPlatform(),
         ];
     }
 }
