@@ -49,7 +49,7 @@ security:
     access_control:
 
        #  - { path: ^/, roles: PUBLIC_ACCESS }
-         - { path: ^/api/user/*, roles: IS_AUTHENTICATED_FULLY }
+       #  - { path: ^/api/user/*, roles: IS_AUTHENTICATED_FULLY }
          - { path: ^/api, roles: PUBLIC_ACCESS }
 
          #- { path: ^/admin, roles: IS_AUTHENTICATED_FULLY }

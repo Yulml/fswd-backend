@@ -91,7 +91,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function getUserGames(User $user)
     {
-
         // I want to show only the game name, game cover, genre name and platform name.
 
         $qb = $this->createQueryBuilder('u');
@@ -112,7 +111,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         
         return $this->createQueryBuilder('u')
             ->select('u.nickname, u.avatar')
-            ->where($qb->expr()->eq('u.id', $user->getId()))
+            ->andWhere($qb->expr()->eq('u.id', $user->getId()))
             ->getQuery()
             ->getArrayResult();
     }
