@@ -68,7 +68,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function createUser(array $data): User
     {
         // add new user 
-        // we control the avatar because we should always have default_avatar.jpg as a fallback
         $user = new User();
         $user->setEmail($data['email']);
         $hashedPassword = $this->passwordHasher->hashPassword(
@@ -111,7 +110,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         
         return $this->createQueryBuilder('u')
             ->select('u.nickname, u.avatar')
-            ->andWhere($qb->expr()->eq('u.id', $user->getId()))
+            ->where($qb->expr()->eq('u.id', $user->getId()))
             ->getQuery()
             ->getArrayResult();
     }
