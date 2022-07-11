@@ -59,6 +59,21 @@ class OwnedRepository extends ServiceEntityRepository
         return $result;
     }
 
+    public function sortByUser(): array {
+        $queryResult = $this->createQueryBuilder('o')
+        ->select('o, u')
+        ->innerJoin('o.user','u')
+        ->getQuery()
+        ->getArrayResult();
+    
+        $userIds = [];
+        foreach($queryResult as $owned) {
+            $userIds[$owned['user']['id']] = $owned['user'];
+        }
+
+        return $userIds;
+    }
+
 //    /**
 //     * @return Owned[] Returns an array of Owned objects
 //     */

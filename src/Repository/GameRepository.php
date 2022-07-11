@@ -58,7 +58,7 @@ class GameRepository extends ServiceEntityRepository
                 'name' => $game->getName(),
                 'platform' => $game->getPlatform()->getName(),
                 'genre' => $game->getGenre()->getName(),
-                'cover' => $game->getCover(),
+                'cover' => 'http://localhost:8080/uploads/games/' . $game->getCover(),
             ];
         }
         return $result;

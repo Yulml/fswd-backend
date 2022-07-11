@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\User;
+use App\Repository\OwnedRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 class UserController extends AbstractController
 {
     public function __construct(
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private OwnedRepository $ownedRepository
     ) {
     }
 
@@ -35,12 +37,12 @@ class UserController extends AbstractController
     public function new(Request $request, UserRepository $userRepository): Response
     {
         // create new user
-        $validator = ['email', 'password', 'roles', 'nickname', 'dateofbirth', 'avatar'];
+        $validator = ['username', 'password', 'roles', 'nickname', 'dateofbirth', 'avatar'];
         $data = $request->toArray();
 
         foreach ($validator as $validation) {
             if (!isset($data[$validation])) {
-                return new Response('key ' . $validation . ' not', 422); // 422: entity not processable
+                return new Response('key ' . $validation . ' not processable', 422); // 422: entity not processable
             }
         }
         $user = $userRepository->createUser($data);
@@ -51,12 +53,30 @@ class UserController extends AbstractController
     #[Route('/api/user/{id}', methods: 'GET')]
     public function show($id, UserRepository $userRepository): Response
     {
-        // show specific user
+        // show specific user. I need to move this to the repository
         $user = $userRepository->find($id);
         if ($user == null) {
             throw $this->createNotFoundException();
         }
-        return $this->json($user->toArray());
+
+        $avatar='';
+         if(!empty($user->getAvatar()))
+         {
+             $avatar='http://localhost:8080/uploads/avatars/'.$user->getAvatar();
+         }
+        
+         $resultado[]=[
+             'id' => $user->getId(),
+             'email' => $user->getEmail(),
+             'password' => $user->getPassword(),
+             'nickname' => $user->getNickname(),
+             'roles' => $user->getRoles(),
+             'dateofbirth' => $user->getDob()->format('d-m-Y H:i'),
+             'avatar' => $avatar,
+        ];
+
+        return $this->json($resultado);
+        
     }
 
     #[Route('/api/user/{id}/collector', methods: 'GET')]
@@ -65,6 +85,14 @@ class UserController extends AbstractController
         //show only nick and avatar specific user
         return $this->json($this->userRepository->getCollector($user));
     }
+
+    #[Route('/api/user/collectors/get', methods: 'GET')]
+    public function getCollectorsAction(): Response
+    {
+        // get all collectors, 10 per page
+        return $this->json($this->ownedRepository->sortByUser());
+    }
+
 
     #[Route('/api/user/edit/{user}', methods: 'PUT')]
     public function edit(Request $request, User $user): Response

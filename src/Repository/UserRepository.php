@@ -22,7 +22,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $passwordHasher, private PaginatorInterface $paginator)
+    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $passwordHasher, private OwnedRepository $ownedRepository,private PaginatorInterface $paginator)
     {
         parent::__construct($registry, User::class);
     }
@@ -69,7 +69,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         // add new user 
         $user = new User();
-        $user->setEmail($data['email']);
+        $user->setEmail($data['username']);
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,
             $data['password']
@@ -85,8 +85,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
         return $user;
     }
-
-
 
     public function getUserGames(User $user)
     {
@@ -114,6 +112,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getArrayResult();
     }
+
+
+    
 
     public function updateUser(User $user, array $data): ?User
     {
@@ -157,8 +158,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return $result;
     }
-
-
+    
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

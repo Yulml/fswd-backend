@@ -95,6 +95,7 @@ class Platform
     
     public function toArray(): array {
         return [
+            'id' => $this->getId(),
             'name' => $this->getName(),
             'picture' => $this->getPicture(),
         ];

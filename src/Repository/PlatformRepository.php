@@ -57,7 +57,7 @@ class PlatformRepository extends ServiceEntityRepository
             $result[] = [
                 'id' => $platform->getId(),
                 'name' => $platform->getName(),
-                'picture' => $platform->getpicture(),
+                'picture' => 'http://localhost:8080/uploads/platforms/' . $platform->getPicture(),
             ];
         }
         return $result;
@@ -66,10 +66,12 @@ class PlatformRepository extends ServiceEntityRepository
     public function getPlatformGames(Platform $platform)
     {
         $qb = $this->createQueryBuilder('p'); 
+        // $games = $this->find($platform->getId());
+
         return [
             'id' => $platform->getId(),
             'name' => $platform->getName(),
-            'picture' => $platform->getpicture(),
+            'picture' => 'http://localhost:8080/uploads/platforms/' . $platform->getPicture(),
             'games' => $this->createQueryBuilder('p')
             ->select('g.id, g.name, g.cover')
             ->innerJoin('p.games', 'g', Join::WITH, $qb->expr()->eq('p.id', $platform->getId())) //afinar query)
