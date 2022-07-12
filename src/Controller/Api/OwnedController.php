@@ -21,6 +21,14 @@ class OwnedController extends AbstractController
         // get all users, 10 per page
         return $this->json($this->userRepository->getAllUsersPaginated($request->query->get('page', 1), 10));
     }
+
+    #[Route('/api/owned/new', methods: 'POST')]
+    public function new(Request $request): Response
+    {
+        // get all users, 10 per page
+        return $this->json($this->ownedRepository->createOwned($request->query->get('page', 1), 10));
+    }
+    
     
     #[Route('/api/owned/delete/{id}', methods: 'DELETE')]
     public function delete($id, OwnedRepository $ownedRepository): Response
@@ -37,8 +45,7 @@ class OwnedController extends AbstractController
                 'message' => $exception->getMessage()
             ], 400);
         }
-        return $this->json([204]);
+        return $this->json(['Successfully deleted', 204]);
     }
 
-    
 }

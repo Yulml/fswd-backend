@@ -74,6 +74,18 @@ class OwnedRepository extends ServiceEntityRepository
         return $userIds;
     }
 
+    public function createOwned($user, $game): Owned
+    {
+        $owned = new Owned();
+        $owned->setUser($user);
+        $owned->setGame($game);
+
+        $this->_em->persist($owned);
+        $this->_em->flush();
+        return $owned;
+    }
+
+
 //    /**
 //     * @return Owned[] Returns an array of Owned objects
 //     */

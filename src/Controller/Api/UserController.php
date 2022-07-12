@@ -89,7 +89,6 @@ class UserController extends AbstractController
     #[Route('/api/user/collectors/get', methods: 'GET')]
     public function getCollectorsAction(): Response
     {
-        // get all collectors, 10 per page
         return $this->json($this->ownedRepository->sortByUser());
     }
 
@@ -107,8 +106,8 @@ class UserController extends AbstractController
         if ($user == null) {
             throw $this->createNotFoundException('key' . $id . 'not found. There is no such user.');
         }
-        if (!$this->isGranted('ROLE_SUPERADMIN')) {
-            throw $this->createAccessDeniedException('Only a superadmin can delete users.');
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Only an admin can delete users.');
         }
 
         try {
