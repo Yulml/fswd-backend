@@ -113,17 +113,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getArrayResult();
     }
 
-
-    
-
     public function updateUser(User $user, array $data): ?User
     {
         if ($data['email'] !== '') {
             $user->setEmail($data['email']);
         }
-        if ($data['roles'] !== '' || $data['roles'] !== 'ROLE_USER') {
-            $user->setRoles($data['roles']);
-        }
+        // if ($data['roles'] !== '' || $data['roles'] !== 'ROLE_REGISTERED') {
+        //     $user->setRoles($data['roles']);
+        // }
         if ($data['password'] !== '') {
             $hashedPassword = $this->passwordHasher->hashPassword(
                 $user,
@@ -134,13 +131,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($data['nickname'] !== '') {
             $user->setNickname($data['nickname']);
         }
-        if ($data['dateofbirth'] !== '') {
-            $user->setDob(new \DateTime($data['dateofbirth']), 'Y/m/d');
-        }
-        if ($data['avatar'] !== '') {
-            $user->setAvatar($data['avatar']);
-        }
-
+        // if ($data['dateofbirth'] !== '') {
+        //     $user->setDob(new \DateTime($data['dateofbirth']), 'Y/m/d');
+        // }
+        // if ($data['avatar'] !== '') {
+        //     $user->setAvatar($data['avatar']);
+        // }
+        
         $this->_em->flush();
 
         return $user;

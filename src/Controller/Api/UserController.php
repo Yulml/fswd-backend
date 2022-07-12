@@ -93,7 +93,7 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/api/user/edit/{user}', methods: 'PUT')]
+    #[Route('/api/user/edit/{user}', methods: 'POST')]
     public function edit(Request $request, User $user): Response
     {
         return $this->json($this->userRepository->updateUser($user, $request->toArray())->toArray());

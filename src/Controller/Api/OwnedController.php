@@ -25,10 +25,8 @@ class OwnedController extends AbstractController
     #[Route('/api/owned/new', methods: 'POST')]
     public function new(Request $request): Response
     {
-        // get all users, 10 per page
         return $this->json($this->ownedRepository->createOwned($request->query->get('page', 1), 10));
     }
-    
     
     #[Route('/api/owned/delete/{id}', methods: 'DELETE')]
     public function delete($id, OwnedRepository $ownedRepository): Response
